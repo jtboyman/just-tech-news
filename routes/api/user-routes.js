@@ -51,6 +51,31 @@ router.post('/', (req, res) => {
     });
 });
 
+// POST to log in bc more secure bc request param is in req.body instead of URL
+router.post('/login', (req, res) => {
+    //expects {email: 'email@email.com', password:'password1234'}
+    User.findOne({ //queried user table for email entered by user
+        where: {
+            email: req.body.email //assigned email to this
+        }
+    }).then(dbUserData => {
+        if (!dbUserData) {
+            res.status(400).json({message: 'No user with that email address!'});
+            return;
+        }
+
+        //verify user
+        //returns boolean, using method from User.js
+        const validPassword = dbUserData.checkPassword(req.body.password);
+
+        if (!validPassword) {
+            res.status(400).json({message: 'Incorrect password!'});
+            return;
+        }
+        res.json({user: dbUserData, message: 'You are now logged in!'});
+    });
+});
+
 // PUT /api/users/1 (uses req.body req.params)
 router.put('/:id', (req, res) => {
     // expects {username: 'username', email: 'email@email.com', password: 'password1234'}
