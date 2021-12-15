@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Vote } = require('../../models');
 
 // GET /api/users (will select all users from user table in database and send
 //it back as json)
@@ -21,7 +21,19 @@ router.get('/:id', (req, res) =>{
         attributes: {exclude: ['password']}, //protect passwords
         where: {
             id: req.params.id
-        }
+        },
+        include: [
+            {
+                model: Post, //see the posts the user has made
+                attributes: ['id','title', 'post_url', 'created_at']
+            },
+            {
+                model: Post, //see the upvoted posts
+                attributes: ['title'],
+                through: Vote, //goes through the vote table
+                as: 'voted_posts'
+            }
+        ]
     })
     .then(dbUserData => {
         if (!dbUserData) {
