@@ -19,6 +19,8 @@ if (process.env.JAWSDB_URL) {
   });
 }
 
+module.exports = sequelize;
+
 /*imports the base Sequelize class and uses it to 
 create a new connection to the database. The new Sequelize() function accepts 
 the database name, MySQL username, and MySQL password (respectively) as 
