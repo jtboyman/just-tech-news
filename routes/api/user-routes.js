@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User, Post, Vote } = require('../../models');
+const { User, Post, Vote, Comment } = require('../../models');
 
 // GET /api/users (will select all users from user table in database and send
 //it back as json)
@@ -26,6 +26,14 @@ router.get('/:id', (req, res) =>{
             {
                 model: Post, //see the posts the user has made
                 attributes: ['id','title', 'post_url', 'created_at']
+            },
+            {
+                model: Comment, //see the comments the user has made
+                attributes: ['id','comment_text', 'created_at'],
+                include: {
+                    model: Post, //so you can access to show what post the comment is on
+                    attributes: ['title']
+                }
             },
             {
                 model: Post, //see the upvoted posts

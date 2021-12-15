@@ -2,7 +2,7 @@ const sequelize = require('../../config/connection'); //to use a special thing
 const router = require('express').Router();
 //we get user and post both bc we need info about User as well
 //with the foreign key, user_id, can form a JOIN
-const { Post, User, Vote } = require('../../models');
+const { Post, User, Vote, Comment } = require('../../models');
 
 // get all users' posts
 router.get('/', (req, res) => {
@@ -17,6 +17,15 @@ router.get('/', (req, res) => {
         ], 
         order: [['created_at', 'DESC']], //order by newest created
         include: [ //JOINing
+            //for getting comments:
+            {
+                model: Comment,
+                attributes: ['id','comment_text','post_id','user_id','created_at'],
+                include: { //comment model includes User model too so it can attach username to comment
+                    model: User,
+                    attributes: ['username']
+                }
+            },
             {
                 model: User, //referring to User model
                 attributes: ['username'] //from the User model
@@ -45,6 +54,15 @@ router.get('/:id', (req, res) => {
             [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
         ],
         include: [
+            //for getting comments:
+            {
+                model: Comment,
+                attributes: ['id','comment_text','post_id','user_id','created_at'],
+                include: { //comment model includes User model too so it can attach username to comment
+                    model: User,
+                    attributes: ['username']
+                }
+            },
             {
                 model: User,
                 attributes: ['username']
