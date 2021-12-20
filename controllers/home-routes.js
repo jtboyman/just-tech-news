@@ -4,7 +4,9 @@ const { Post, User, Comment } = require('../models');
 
 const router = require('express').Router();
 
+//get then render all the posts
 router.get('/', (req, res) => {
+    console.log(req.session);
     Post.findAll({
       attributes: [
         'id',
@@ -40,6 +42,16 @@ router.get('/', (req, res) => {
         console.log(err);
         res.status(500).json(err);
       });
+  });
+
+  //render the login page
+  router.get('/login', (req, res) => { //no second arg bc no variables needed
+    if (req.session.loggedIn) { //if you're already logged in bc session knows
+        res.redirect('/');
+        return;
+    }
+    
+    res.render('login');
   });
 
 module.exports = router;
