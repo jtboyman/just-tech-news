@@ -5,7 +5,7 @@ async function logout() {
     });
 
     if (response.ok) {
-        document.location.replace('/login');
+        document.location.replace('/'); //this could take u to login screen if u /login
     } else {
         alert(response.statusText);
     }
