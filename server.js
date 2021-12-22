@@ -2,9 +2,10 @@ const express = require('express');
 const routes = require('./controllers/');
 const sequelize = require('./config/connection'); //import connection to Sequelize
 const path = require('path');
+const helpers = require('./utils/helpers');
 
 const exphbs = require('express-handlebars');
-const hbs = exphbs.create({});
+const hbs = exphbs.create({helpers}); //summon the helpers
 
 //connects session to sequelize database
 const session = require('express-session');
@@ -32,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public'))); //for the css in public
  can take all of the contents of a folder and serve them as static assets.
  This is useful for front-end specific files like images, style sheets, and
  JavaScript files.*/
- 
+
 app.use(session(sess));
 
 
