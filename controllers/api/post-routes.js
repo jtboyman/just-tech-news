@@ -3,6 +3,7 @@ const router = require('express').Router();
 //we get user and post both bc we need info about User as well
 //with the foreign key, user_id, can form a JOIN
 const { Post, User, Vote, Comment } = require('../../models');
+const withAuth = require('../../utils/auth');
 
 // get all users' posts
 router.get('/', (req, res) => {
@@ -83,13 +84,14 @@ router.get('/:id', (req, res) => {
 });
 
 //create a post
-router.post('/', (req, res) => {
+router.post('/', withAuth, (req, res) => {
     //expects {title: 'Post Title', post_url: 'http url blah', user_id: 1(any integer)}
     Post.create({ //req.body is the request from the user and has these properties
         //req.body populates the post table
         title: req.body.title,
         post_url: req.body.post_url,
-        user_id: req.body.user_id
+        // /api/posts endpoint requires user ID from the currecnt session:
+        user_id: req.session.user_id
     })
     .then(dbPostData => res.json(dbPostData))
     .catch(err => {
@@ -99,15 +101,18 @@ router.post('/', (req, res) => {
 });
 
 //PUT /api/posts/upvote (has to go before other put route or else express will think "update" is a valid param for /:id)
-router.put('/upvote', (req, res) => {
-    //custom static method created in model/Post.js
-    Post.upvote(req.body, {Vote})
-    .then(updatedPostData => res.json(updatedPostData))
-    .catch(err => {
-        console.log(err);
-        res.status(400).json(err);
-    });
-
+router.put('/upvote', withAuth, (req, res) => {
+    //make sure the SESSION exists first
+    if (req.session) {
+        //pass session id along with all destructured properties on req.body
+        //remember this is custom static method created in model/Post.js
+        Post.upvote({...req.body, user_id: req.session.user_id}, {Vote, Comment, User})
+            .then(updatedVoteData => res.json(updatedVoteData))
+            .catch(err => {
+                console.log(err);
+                res.status(500).json(err);
+            });
+    }
     /* THIS LOGIC WAS REFACTORED AND EXISTS IN POST.JS AS A MODEL METHOD Post.upvote
     Vote.create({ //to create vote need both user id and post id
         user_id: req.body.user_id,
@@ -140,7 +145,7 @@ router.put('/upvote', (req, res) => {
 });
 
 //update a post title
-router.put('/:id', (req, res) => {
+router.put('/:id', withAuth, (req, res) => {
     Post.update(
         {
             title: req.body.title
@@ -165,7 +170,7 @@ router.put('/:id', (req, res) => {
 });
 
 //delete a post
-router.delete('/:id', (req, res) => {
+router.delete('/:id', withAuth, (req, res) => {
     Post.destroy({
         where: {
             id: req.params.id
