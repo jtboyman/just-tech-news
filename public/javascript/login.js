@@ -45,7 +45,7 @@ async function loginFormHandler(event) {
     });
 
     if (response.ok) {
-      document.location.replace('/'); //take us to homepage i think
+      document.location.replace('/dashboard'); //take us dashboard
     } else {
       alert(response.statusText); //tell u it messed up
     }
